@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('NetworkInit'){
             steps {
-                dir('m8/networking/'){
+                dir('./'){
                     sh 'terraform --version'
                     sh "terraform init --backend-config='path=${params.CONSUL_STATE_PATH}'"
                 }
@@ -31,14 +31,14 @@ pipeline {
         }
         stage('NetworkValidate'){
             steps {
-                dir('m8/networking/'){
+                dir('./'){
                     sh 'terraform validate'
                 }
             }
         }
         stage('NetworkPlan'){
             steps {
-                dir('m8/networking/'){
+                dir('./'){
                     script {
                         try {
                            sh "terraform workspace new ${params.WORKSPACE}"
@@ -60,13 +60,13 @@ pipeline {
                         apply = true
                     } catch (err) {
                         apply = false
-                        dir('m8/networking/'){
+                        dir('./'){
                             sh "terraform destroy -auto-approve"
                         }
                         currentBuild.result = 'UNSTABLE'
                     }
                     if(apply){
-                        dir('m8/networking/'){
+                        dir('./'){
                             unstash "terraform-networking-plan"
                             sh 'terraform apply terraform-networking.tfplan'
                         }
